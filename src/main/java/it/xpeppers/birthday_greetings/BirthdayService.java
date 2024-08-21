@@ -17,15 +17,7 @@ import java.util.List;
 public class BirthdayService {
 
 	public void sendGreetings(String fileName, XDate xDate, String smtpHost, int smtpPort) throws IOException, ParseException, AddressException, MessagingException {
-		List<Employee> employees = new ArrayList<>();
-		BufferedReader in = new BufferedReader(new FileReader(fileName));
-		String str = "";
-		str = in.readLine(); // skip header
-		while ((str = in.readLine()) != null) {
-			String[] employeeData = str.split(", ");
-			Employee employee = new Employee(employeeData[1], employeeData[0], employeeData[2], employeeData[3]);
-			employees.add(employee);
-		}
+		List<Employee> employees = readEmployeesFromFile(fileName);
 		for (Employee employee : employees) {
 			if (employee.isBirthday(xDate)) {
 				String recipient = employee.getEmail();
@@ -34,6 +26,19 @@ public class BirthdayService {
 				sendMessage(smtpHost, smtpPort, "sender@here.com", subject, body, recipient);
 			}
 		}
+	}
+
+	private static List<Employee> readEmployeesFromFile(String fileName) throws IOException, ParseException {
+		List<Employee> employees = new ArrayList<>();
+		BufferedReader in = new BufferedReader(new FileReader(fileName));
+		String str;
+        in.readLine(); // skip header
+        while ((str = in.readLine()) != null) {
+			String[] employeeData = str.split(", ");
+			Employee employee = new Employee(employeeData[1], employeeData[0], employeeData[2], employeeData[3]);
+			employees.add(employee);
+		}
+		return employees;
 	}
 
 	private void sendMessage(String smtpHost, int smtpPort, String sender, String subject, String body, String recipient) throws AddressException, MessagingException {
